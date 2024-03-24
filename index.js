@@ -8,10 +8,13 @@ const client = new Client({
 });
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import dotenv from 'dotenv';
 
-const MODEL_NAME = "gemini-1.0-pro";
-const API_KEY = "AIzaSyD8Jgd-lGnC0883Z3lL6qFiz6iz7i7-VC0";
-const TOKEN ="MTIyMTE4NzkyNTkyOTM2NTU0NA.GCTxcW.6QUzi-QGSquOF4VhD0Ao0yKSe77KIiUiLPU1Qo";
+
+dotenv.config();
+const MODEL_NAME = process.env.MODEL_NAME;
+const API_KEY = process.env.API_KEY;
+const TOKEN =process.env.TOKEN;
 
 async function runChat(userPrompt) {
   const genAI = new GoogleGenerativeAI(API_KEY);
@@ -60,6 +63,29 @@ async function runChat(userPrompt) {
   const response = result.response;
   return response.text();
 }
+// Image generation
+const imageGenerator = async (promptText) => {
+  try {
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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',
+        'user-agent': 'chrome'
+      },
+      body: JSON.stringify({
+        prompt: promptText,
+        n: 1,
+        size: '512x512'
+      }),
+    });
+    const data = await response.json();
+    const imageUrl = data.data[0].url;
+    return imageUrl;
+  } catch (error) {
+    console.error('Error generating image:', error);
+  }
+}
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -71,9 +97,20 @@ client.on("messageCreate", (message) => {
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
 
-  const userText = message.cleanContent;
+  const imageText = message.content.toLowerCase();
+  if(imageText.includes("generate image")||imageText.includes("generate")) {
+    const promptText = message.content.substring("generate image".length).trim();
+    imageGenerator(promptText).then((imageUrl) => {
+      message.reply(imageUrl);
+    })
+    .catch((error) => {
+      console.error('Error generating image:', error);
+    });
+  } else {
+    const userText = message.cleanContent;
     runChat(userText).then((response) => {
         message.reply(response);
     });
+  }
 });
 client.login(TOKEN);
