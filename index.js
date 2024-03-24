@@ -94,10 +94,13 @@ client.on("messageCreate", (message) => {
   console.log(message.content);
 });
 
+const prefix = '!chat'; // Change this to your desired prefix
 client.on("messageCreate", (message) => {
   if (message.author.bot) return;
-
-  const imageText = message.content.toLowerCase();
+  if (!message.content.startsWith(prefix)) return; // Only process messages with the prefix
+  // Remove the prefix from the message and trim whitespace
+  const userText = message.content.substring(prefix.length).trim();
+  const imageText = userText.toLowerCase();
   if(imageText.includes("generate image")||imageText.includes("generate")) {
     const promptText = message.content.substring("generate image".length).trim();
     imageGenerator(promptText).then((imageUrl) => {
@@ -107,7 +110,7 @@ client.on("messageCreate", (message) => {
       console.error('Error generating image:', error);
     });
   } else {
-    const userText = message.cleanContent;
+    // const userText = message.cleanContent;
     runChat(userText).then((response) => {
         message.reply(response);
     });
