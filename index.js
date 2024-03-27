@@ -9,6 +9,8 @@ const client = new Client({
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from 'dotenv';
+import Image from './models/Images.js';
+import connectDB from './db.js';
 
 
 dotenv.config();
@@ -64,7 +66,7 @@ async function runChat(userPrompt) {
   return response.text();
 }
 // Image generation
-const imageGenerator = async (promptText) => {
+const imageGenerator = async (promptText,userId) => {
   try {
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -81,6 +83,8 @@ const imageGenerator = async (promptText) => {
     });
     const data = await response.json();
     const imageUrl = data.data[0].url;
+    const image = new Image({url: imageUrl, userId});
+    await image.save();
     return imageUrl;
   } catch (error) {
     console.error('Error generating image:', error);
@@ -89,6 +93,7 @@ const imageGenerator = async (promptText) => {
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  connectDB(); // Connect to MongoDB
 });
 client.on("messageCreate", (message) => {
   console.log(message.content);
@@ -96,6 +101,7 @@ client.on("messageCreate", (message) => {
 
 const prefix = '!chat'; // Change this to your desired prefix
 client.on("messageCreate", (message) => {
+  
   if (message.author.bot) return;
   if (!message.content.startsWith(prefix)) return; // Only process messages with the prefix
   // Remove the prefix from the message and trim whitespace
@@ -103,7 +109,7 @@ client.on("messageCreate", (message) => {
   const imageText = userText.toLowerCase();
   if(imageText.includes("generate image")||imageText.includes("generate")) {
     const promptText = message.content.substring("generate image".length).trim();
-    imageGenerator(promptText).then((imageUrl) => {
+    imageGenerator(promptText,message.id).then((imageUrl) => {
       message.reply(imageUrl);
     })
     .catch((error) => {
