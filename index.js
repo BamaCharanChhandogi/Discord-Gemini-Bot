@@ -12,8 +12,16 @@ import dotenv from 'dotenv';
 import Image from './models/Images.js';
 import connectDB from './db.js';
 
-
+// cloudnary
+import cloudinary from 'cloudinary';
 dotenv.config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 const MODEL_NAME = process.env.MODEL_NAME;
 const API_KEY = process.env.API_KEY;
 const TOKEN =process.env.TOKEN;
@@ -66,26 +74,31 @@ async function runChat(userPrompt) {
   return response.text();
 }
 // Image generation
-const imageGenerator = async (promptText,userId) => {
+const imageGenerator = async (promptText, userId) => {
   try {
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         'user-agent': 'chrome'
       },
-      body: JSON.stringify({
-        prompt: promptText,
-        n: 1,
-        size: '512x512'
-      }),
+      body: JSON.stringify({ prompt: promptText, n: 1, size: '512x512' }),
     });
     const data = await response.json();
     const imageUrl = data.data[0].url;
-    const image = new Image({url: imageUrl, userId});
+    console.log(imageUrl);
+
+    // Now, upload the generated image to Cloudinary
+    const uploadResponse = await cloudinary.v2.uploader.upload(imageUrl, {
+      upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET,
+    });
+
+    const cloudinaryUrl = uploadResponse.secure_url;
+    console.log(cloudinaryUrl);
+    const image = new Image({ url: cloudinaryUrl, userId });
     await image.save();
-    return imageUrl;
+    return cloudinaryUrl;
   } catch (error) {
     console.error('Error generating image:', error);
   }
