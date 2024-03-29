@@ -46,9 +46,9 @@ The bot will start running and listening for commands in the Discord server it h
 
 ## Commands
 
-- `!ask <question>`: Ask the bot a question, and it will provide an answer using the Gemini API.
-- `!image <prompt>`: Generate an image based on the given prompt using the Gemini API's image generation capabilities.
-- `!chat <message>`: Start a conversation with the bot by sending a message. The bot will respond accordingly.
+- `!chat <question>`: Ask the bot a question, and it will provide an answer using the Gemini API.
+<!-- - `!image <prompt>`: Generate an image based on the given prompt using the Gemini API's image generation capabilities.
+- `!chat <message>`: Start a conversation with the bot by sending a message. The bot will respond accordingly. -->
 --------------------------------------------
 
 ## Contributing
