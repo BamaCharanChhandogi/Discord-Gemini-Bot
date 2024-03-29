@@ -11,7 +11,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Keyword Listener
-        uses: your-username/keyword-listener-action@main
+        uses: BamaCharanChhandogi/hello_world@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          keyword: 'your-keyword'
+          keyword: 'Hello I am bama '
