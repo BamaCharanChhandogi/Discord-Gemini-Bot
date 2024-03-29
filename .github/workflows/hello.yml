@@ -5,7 +5,7 @@ jobs:
     steps:
       - name: Hello world action step
         id: hello
-        uses: your-username/hello-world-action@main
+        uses: BamaCharanChhandogi/hello_world@main
         with:
           name: 'Mona the Octocat'
       - name: Get the output time
