@@ -1,15 +1,17 @@
 on:
-  release:
-    types: [created]
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited]
+
 jobs:
-  hello_world_job:
+  keyword-listener:
     runs-on: ubuntu-latest
-    name: A job to say hello
     steps:
-      - name: Hello world action step
-        id: hello
-        uses: BamaCharanChhandogi/hello_world@main
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Keyword Listener
+        uses: your-username/keyword-listener-action@main
         with:
-          name: 'Mona the Octocat'
-      - name: Get the output time
-        run: echo "The time was ${{ steps.hello.outputs.time }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          keyword: 'your-keyword'
